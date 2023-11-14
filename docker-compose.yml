@@ -30,7 +30,7 @@ services:
 
   # A PHP website with multiple pages
   website:
-    image: php:8.2-apache
+    build: . # Take the docker file from the current working directory
     volumes:
       - "./:/var/www/html" # Sync current working directory with the container's web directory
     ports:
