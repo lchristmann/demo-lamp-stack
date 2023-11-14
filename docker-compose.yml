@@ -1,0 +1,40 @@
+version: '3' # Docker Compose version
+services:
+
+  # The MySQL database
+  db: 
+    image: mysql:latest
+    environment:
+      - MYSQL_DATABASE=php_docker
+      - MYSQL_USER=php_docker #  The php_docker user
+      - MYSQL_PASSWORD=password
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1 # The root user will have a blank password (which is hereby allowed)
+    volumes:
+      - "./db:/docker-entrypoint-initdb.d" # Sync SQL files with container
+  # It cannot be reached from the host machine, e.g. your local computer, because the container doesn't expose any ports
+  # It can we reached within the virtual Docker network via its service name (`db`) and the default MySQL port (3306)
+
+
+  # The MySQL database administration tool phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - 8001:80
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=3306
+    depends_on:
+      - db
+    # Log in on `localhost:8001` with the user `php_docker` that we have created earlier
+
+
+  # A PHP website with multiple pages
+  website:
+    image: php:8.2-apache
+    volumes:
+      - "./:/var/www/html" # Sync current working directory with the container's web directory
+    ports:
+      - 80:80 # Bind port 80 on our local machine to port 80 on the container
+      - 443:443 # For future HTTPS traffic
+    depends_on:
+      - db
